@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test - Send Button & Currency Icons</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 25px;
+            padding: 5px 10px;
+            transition: all 0.3s ease;
+            max-width: 500px;
+        }
+        
+        .input-wrapper:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        #message-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            background: transparent;
+        }
+        
+        .send-button {
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            min-height: 50px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Pro', sans-serif;
+            font-weight: 900;
+        }
+        
+        .send-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .send-button:not(:disabled):hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .send-button i {
+            font-size: 1rem;
+            line-height: 1;
+            color: white;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e1e5e9;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+            max-width: 300px;
+        }
+        
+        .metric-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Pro', sans-serif;
+            font-weight: 900;
+        }
+        
+        .metric-content h4 {
+            margin: 0 0 8px 0;
+            color: #4a5568;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0;
+        }
+        
+        .debug-info {
+            background: #f7f7f7;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Test Page - Send Button & Currency Display</h1>
+    
+    <div class="test-section">
+        <h3>Send Button Test</h3>
+        <div class="input-wrapper">
+            <input type="text" id="message-input" placeholder="Type a message..." />
+            <button id="send-button" class="send-button">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+        <div class="debug-info" id="send-debug">
+            <!-- Debug info will appear here -->
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Currency Icon Test</h3>
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="metric-content">
+                <h4>Total Revenue</h4>
+                <p class="metric-value" id="revenue-value">$12,345.67</p>
+            </div>
+        </div>
+        <div class="debug-info" id="currency-debug">
+            <!-- Debug info will appear here -->
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Other Font Awesome Icons Test</h3>
+        <div style="display: flex; gap: 20px; font-size: 24px;">
+            <i class="fas fa-shopping-cart"></i>
+            <i class="fas fa-users"></i>
+            <i class="fas fa-chart-bar"></i>
+            <i class="fas fa-chart-line"></i>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Debug test page loaded');
+            
+            const sendButton = document.getElementById('send-button');
+            const messageInput = document.getElementById('message-input');
+            const sendDebug = document.getElementById('send-debug');
+            const currencyDebug = document.getElementById('currency-debug');
+            
+            // Debug send button
+            if (sendButton) {
+                const sendInfo = {
+                    'Element found': true,
+                    'offsetWidth': sendButton.offsetWidth,
+                    'offsetHeight': sendButton.offsetHeight,
+                    'visibility': window.getComputedStyle(sendButton).visibility,
+                    'display': window.getComputedStyle(sendButton).display,
+                    'opacity': window.getComputedStyle(sendButton).opacity,
+                    'innerHTML': sendButton.innerHTML,
+                    'boundingRect': sendButton.getBoundingClientRect()
+                };
+                
+                sendDebug.innerHTML = '<strong>Send Button Debug:</strong><br>' + 
+                    Object.entries(sendInfo).map(([key, value]) => 
+                        `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`
+                    ).join('<br>');
+                
+                console.log('Send button debug:', sendInfo);
+            }
+            
+            // Debug currency icons
+            const dollarIcons = document.querySelectorAll('.fa-dollar-sign');
+            const currencyInfo = {
+                'Icons found': dollarIcons.length,
+                'Font family': window.getComputedStyle(dollarIcons[0] || document.body).fontFamily,
+                'Font loading': document.fonts.status
+            };
+            
+            if (dollarIcons.length > 0) {
+                const firstIcon = dollarIcons[0];
+                currencyInfo['First icon visibility'] = window.getComputedStyle(firstIcon).visibility;
+                currencyInfo['First icon display'] = window.getComputedStyle(firstIcon).display;
+                currencyInfo['First icon color'] = window.getComputedStyle(firstIcon).color;
+            }
+            
+            currencyDebug.innerHTML = '<strong>Currency Icons Debug:</strong><br>' + 
+                Object.entries(currencyInfo).map(([key, value]) => 
+                    `${key}: ${value}`
+                ).join('<br>');
+            
+            console.log('Currency icons debug:', currencyInfo);
+            
+            // Enable/disable send button based on input
+            messageInput.addEventListener('input', function() {
+                sendButton.disabled = !this.value.trim();
+            });
+            
+            // Test send button click
+            sendButton.addEventListener('click', function() {
+                alert('Send button clicked! Value: ' + messageInput.value);
+                console.log('Send button clicked successfully');
+            });
+            
+            // Check font loading
+            document.fonts.ready.then(function() {
+                console.log('All fonts loaded');
+                // Re-check currency icons after fonts load
+                setTimeout(() => {
+                    const updatedIcons = document.querySelectorAll('.fa-dollar-sign');
+                    console.log('Dollar icons after font load:', updatedIcons.length);
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>

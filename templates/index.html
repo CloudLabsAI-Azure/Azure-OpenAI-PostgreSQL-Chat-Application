@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Azure OpenAI Database Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Multiple Plotly CDN sources for better reliability -->
+    <script>
+        // Try to load Plotly from multiple CDNs
+        function loadPlotly() {
+            const plotlySources = [
+                'https://cdn.plot.ly/plotly-latest.min.js',
+                'https://unpkg.com/plotly.js@latest/dist/plotly.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js'
+            ];
+            
+            let currentSource = 0;
+            
+            function tryLoadScript() {
+                if (currentSource >= plotlySources.length) {
+                    console.warn('All Plotly CDN sources failed, charts will use fallback rendering');
+                    window.PlotlyLoadFailed = true;
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = plotlySources[currentSource];
+                script.onload = function() {
+                    console.log('✅ Plotly loaded successfully from:', plotlySources[currentSource]);
+                    window.PlotlyLoaded = true;
+                };
+                script.onerror = function() {
+                    console.warn('❌ Failed to load Plotly from:', plotlySources[currentSource]);
+                    currentSource++;
+                    tryLoadScript();
+                };
+                document.head.appendChild(script);
+            }
+            
+            // Check if Plotly is already loaded
+            if (window.Plotly) {
+                console.log('✅ Plotly already available');
+                window.PlotlyLoaded = true;
+            } else {
+                tryLoadScript();
+            }
+        }
+        
+        // Load Plotly immediately
+        loadPlotly();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-robot"></i> Database Chat Assistant</h1>
+                <p>Ask questions about your data in natural language</p>
+            </div>
+            <div class="header-actions">
+                <button id="clear-chat-btn" class="clear-chat-btn" title="Clear Chat">
+                    <i class="fas fa-broom"></i>
+                    <span class="button-text">Clear Chat</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="chat-container">
+                <div id="chat-messages" class="chat-messages">
+                    <div class="message assistant-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <p>👋 <strong>Welcome to Azure OpenAI Chat!</strong></p>
+                            <p>Ask me anything about your database in natural language.</p>
+                            
+                            <p><strong>Try these examples:</strong></p>
+                            <div class="example-buttons">
+                                <button class="example-btn" data-text="Show me all customers">👥 Show me all customers</button>
+                                <button class="example-btn" data-text="What products cost more than $100?">🛒 What products cost more than $100?</button>
+                                <button class="example-btn" data-text="List recent orders">📋 List recent orders</button>
+                                <button class="example-btn" data-text="Find customers from New York">📍 Find customers from New York</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="message-input" 
+                            placeholder="Ask a question about your data..."
+                            maxlength="1000"
+                            autocomplete="off"
+                        >
+                        <button id="send-button" class="send-button" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="input-suggestions" id="suggestions">
+                        <span class="suggestion" data-text="Show me all tables in the database">📊 Show tables</span>
+                        <span class="suggestion" data-text="What is the total number of records?">🔢 Count records</span>
+                        <span class="suggestion" data-text="Show me recent data">📅 Recent data</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analytics-panel">
+                <div class="analytics-header">
+                    <h3><i class="fas fa-chart-line"></i> Analytics Dashboard</h3>
+                    <button id="refresh-analytics-btn" class="refresh-btn" title="Refresh Analytics Data" onclick="handleRefreshClick(this)">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+
+                <div class="analytics-content">
+                    <!-- Key Metrics Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div class="metric-content">
+                                <h4>Total Revenue</h4>
+                                <p class="metric-value" id="total-revenue">Loading...</p>
+                                <span class="metric-change positive" id="revenue-change">+12.5%</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="metric-content">
+                                <h4>Total Orders</h4>
+                                <p class="metric-value" id="total-orders">Loading...</p>
+                                <span class="metric-change positive" id="orders-change">+8.3%</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="metric-content">
+                                <h4>Total Customers</h4>
+                                <p class="metric-value" id="total-customers">Loading...</p>
+                                <span class="metric-change positive" id="customers-change">+15.2%</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="metric-content">
+                                <h4>Avg Order Value</h4>
+                                <p class="metric-value" id="avg-order-value">Loading...</p>
+                                <span class="metric-change negative" id="aov-change">-2.1%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="charts-section">
+                        <div class="chart-container">
+                            <h4><i class="fas fa-chart-line"></i> Sales Trend (Yearly Overview)</h4>
+                            <div class="chart-placeholder" id="sales-chart">
+                                <div id="sales-trend-plotly" style="width:100%;height:300px;"></div>
+                                <canvas id="salesCanvas" width="300" height="150" style="display:none;"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <h4><i class="fas fa-chart-pie"></i> Top Categories</h4>
+                            <div class="chart-placeholder" id="categories-chart">
+                                <div id="category-bars">
+                                    <!-- Category bars will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <h4><i class="fas fa-map-marker-alt"></i> Sales by State</h4>
+                            <div class="chart-placeholder" id="state-chart">
+                                <div id="state-list">
+                                    <!-- State data will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <h4><i class="fas fa-crown"></i> Top Customers</h4>
+                            <div class="chart-placeholder" id="customers-chart">
+                                <div id="top-customers-list">
+                                    <!-- Top customers will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Enhanced Analytics Insights -->
+                        <div class="insights-section">
+                            <div id="category-insights" class="insight-container">
+                                <!-- Category insights will be populated by JavaScript -->
+                            </div>
+                            
+                            <div id="advanced-metrics" class="insight-container">
+                                <!-- Advanced metrics will be populated by JavaScript -->
+                            </div>
+                            
+                            <div id="predictions" class="insight-container">
+                                <!-- Predictions will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Loading overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Processing your question...</p>
+                <p class="loading-steps" id="loading-steps">Analyzing query</p>
+            </div>
+        </div>
+
+        <!-- Error toast -->
+        <div id="error-toast" class="toast error-toast hidden">
+            <div class="toast-content">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="error-message">An error occurred</span>
+            </div>
+            <button class="toast-close" onclick="hideToast()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Success toast -->
+        <div id="success-toast" class="toast success-toast hidden">
+            <div class="toast-content">
+                <i class="fas fa-check-circle"></i>
+                <span id="success-message">Success!</span>
+            </div>
+            <button class="toast-close" onclick="hideToast()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- SQL Query Modal -->
+    <div id="sql-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-code"></i> Generated SQL Query</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <pre id="sql-content" class="sql-code"></pre>
+                <div class="modal-actions">
+                    <button onclick="copySqlToClipboard()" class="btn btn-secondary">
+                        <i class="fas fa-copy"></i> Copy SQL
+                    </button>
+                    <button onclick="closeModal()" class="btn btn-primary">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
