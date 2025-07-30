@@ -276,16 +276,9 @@ curl -X POST http://localhost:5000/api/security/validate \
 ### Development Security
 - Environment variable protection
 - Secure cookie configuration
-- HTTPS enforcement in production
-- Content Security Policy (CSP) headers
-
 ## Contributing
 
 1. Follow the coding guidelines in `.github/copilot-instructions.md`
 2. Ensure all tests pass
 3. Update documentation as needed
 4. Submit pull requests for review
-
-## License
-
-MIT License
